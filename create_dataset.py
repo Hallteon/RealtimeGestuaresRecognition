@@ -1,10 +1,10 @@
+import time
 from csv import writer
 import cv2
 import mediapipe
 import sys
 import os.path
 import pandas as pd
-
 
 signs = {'up': 0, 'down': 1, 'right': 2, 'left': 3, 'forward': 4, 'back': 5}
 
@@ -16,10 +16,12 @@ frameWidth = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
 frameHeight = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
 start = False
-max_count = int(sys.argv[1])
-name = sys.argv[2]
-fetch = sys.argv[3]
+times = int(sys.argv[1])
+max_count = int(sys.argv[2])
+name = sys.argv[3]
+fetch = sys.argv[4]
 counter = 0
+time_counter = 0
 
 if fetch == 'train':
     name_file = 'train_dataset.csv'
@@ -43,6 +45,9 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
             break
 
         if start:
+            if time_counter < 1:
+                time.sleep(times)
+
             new_row = []
             hands_roi = hands.process(cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
             counter += 1
@@ -53,6 +58,11 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                        'x216', 'x117', 'x217', 'x118', 'x218', 'x119', 'x219', 'x120', 'x220', 'x121',
                        'x221', 'y']
 
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(frame, "Collecting {}".format(counter),
+                        (10, 20), font, 0.7, (0, 255, 255), 2, cv2.LINE_AA)
+            time_counter += 1
+
             if results.multi_hand_landmarks != None:
                 for handLandmarks in results.multi_hand_landmarks:
                     for point in handsModule.HandLandmark:
@@ -61,11 +71,13 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                                                                                               normalizedLandmark.y,
                                                                                               width_roi, height_roi)
                         new_row.extend(list(pixelCoordinatesLandmark))
+
             if os.path.exists(name_file):
                 with open(r'{0}'.format(name_file), 'a') as file:
                     new_row.append(signs[name])
-                    writer_file = writer(file)
-                    writer_file.writerow(new_row)
+                    if len(new_row) > 2:
+                        writer_file = writer(file)
+                        writer_file.writerow(new_row)
             else:
                 data = []
                 data.append(new_row)
@@ -73,7 +85,7 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                 if len(data[data.index(new_row)]) > 0:
                     df = pd.DataFrame(data, columns=columns)
                     df = df.fillna(0)
-                    df.to_csv(r'{0}'.format(name_file))
+                    df.to_csv(r'{0}'.format(name_file), index=False)
 
         if k == ord('a'):
             start = not start

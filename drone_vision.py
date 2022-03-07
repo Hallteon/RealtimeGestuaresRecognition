@@ -1,13 +1,10 @@
-from tensorflow import keras
 from keras.models import load_model
-from csv import writer
 import pandas as pd
 import numpy as np
-import tensorflow as tf
 import cv2
 import mediapipe
 
-REV_CLASS_MAP = {
+gest_map = {
     0: "up",
     1: "down",
     2: "right",
@@ -24,7 +21,7 @@ columns = ['x11', 'x21', 'x12', 'x22', 'x13', 'x23', 'x14', 'x24', 'x15', 'x25',
 
 
 def mapper(val):
-    return REV_CLASS_MAP[val]
+    return gest_map[val]
 
 
 drawingModule = mediapipe.solutions.drawing_utils
@@ -66,17 +63,19 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                     break
 
             if new_row:
-                data = []
-                data.append(new_row)
-                if len(data[data.index(new_row)]) > 2:
-                    df = pd.DataFrame(data, columns=columns)
-                    df = df.fillna(0)
-                    df = df / 310
-                    print(df)
-                    pred = model.predict(df)
-                    move_code = np.argmax(pred[0])
-                    user_move_name = mapper(move_code)
-                    print(user_move_name)
+                try:
+                    data = []
+                    data.append(new_row)
+                    if len(data[data.index(new_row)]) > 2:
+                        df = pd.DataFrame(data, columns=columns)
+                        df = df.fillna(0)
+                        df = df / 310
+                        pred = model.predict(df)
+                        move_code = np.argmax(pred[0])
+                        user_move_name = mapper(move_code)
+                        print(user_move_name)
+                except ValueError:
+                    continue
 
         if k == ord('a'):
             start = not start
