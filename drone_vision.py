@@ -67,7 +67,7 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                     if len(data[data.index(new_row)]) > 2:
                         df = pd.DataFrame(data, columns=columns)
                         df = df.fillna(0)
-                        df = df / 310
+                        df = df / 640
                         pred = model.predict(df)
                         move_code = np.argmax(pred[0])
                         user_move_name = mapper(move_code)
