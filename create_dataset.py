@@ -16,12 +16,17 @@ frameWidth = capture.get(cv2.CAP_PROP_FRAME_WIDTH)
 frameHeight = capture.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
 start = False
-times = int(sys.argv[1])
-max_count = int(sys.argv[2])
-name = sys.argv[3]
-fetch = sys.argv[4]
+max_count = int(sys.argv[1])
+name = sys.argv[2]
+fetch = sys.argv[3]
 counter = 0
 time_counter = 0
+
+columns = ['x11', 'x21', 'x12', 'x22', 'x13', 'x23', 'x14', 'x24', 'x15', 'x25',
+           'x16', 'x26', 'x17', 'x27', 'x18', 'x28', 'x19', 'x29', 'x110', 'x210', 'x111',
+           'x211', 'x112', 'x212', 'x113', 'x213', '114', '214', '115', 'x215', 'x116',
+           'x216', 'x117', 'x217', 'x118', 'x218', 'x119', 'x219', 'x120', 'x220', 'x121',
+           'x221', 'y']
 
 if fetch == 'train':
     name_file = 'train_dataset.csv'
@@ -35,8 +40,7 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
         # roi == 310 307
         ret, frame = capture.read()
         results = hands.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-        cv2.rectangle(frame, (10, 30), (310, 330), (0, 255, 0), 2)
-        roi = frame[25:335, 5:315]
+        height_frame, width_frame, channels_frame = frame.shape
         k = cv2.waitKey(1)
 
         cv2.imshow('Hands recognizer', frame)
@@ -45,23 +49,12 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
             break
 
         if start:
-            if time_counter < 1:
-                time.sleep(times)
-
             new_row = []
-            hands_roi = hands.process(cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
-            counter += 1
-            height_roi, width_roi, channels_roi = roi.shape
-            columns = ['x11', 'x21', 'x12', 'x22', 'x13', 'x23', 'x14', 'x24', 'x15', 'x25',
-                       'x16', 'x26', 'x17', 'x27', 'x18', 'x28', 'x19', 'x29', 'x110', 'x210', 'x111',
-                       'x211', 'x112', 'x212', 'x113', 'x213', '114', '214', '115', 'x215', 'x116',
-                       'x216', 'x117', 'x217', 'x118', 'x218', 'x119', 'x219', 'x120', 'x220', 'x121',
-                       'x221', 'y']
+            hands_frame = hands.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
             font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.putText(frame, "Collecting {}".format(counter),
                         (10, 20), font, 0.7, (0, 255, 255), 2, cv2.LINE_AA)
-            time_counter += 1
 
             if results.multi_hand_landmarks != None:
                 for handLandmarks in results.multi_hand_landmarks:
@@ -69,23 +62,26 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                         normalizedLandmark = handLandmarks.landmark[point]
                         pixelCoordinatesLandmark = drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x,
                                                                                               normalizedLandmark.y,
-                                                                                              width_roi, height_roi)
+                                                                                              width_frame, height_frame)
                         new_row.extend(list(pixelCoordinatesLandmark))
 
-            if os.path.exists(name_file):
-                with open(r'{0}'.format(name_file), 'a') as file:
-                    new_row.append(signs[name])
-                    if len(new_row) > 2:
-                        writer_file = writer(file)
-                        writer_file.writerow(new_row)
-            else:
-                data = []
-                data.append(new_row)
-                data[data.index(new_row)].append(signs[name])
-                if len(data[data.index(new_row)]) > 0:
-                    df = pd.DataFrame(data, columns=columns)
-                    df = df.fillna(0)
-                    df.to_csv(r'{0}'.format(name_file), index=False)
+                if os.path.exists(name_file):
+                    with open(r'{0}'.format(name_file), 'a') as file:
+                        new_row.append(signs[name])
+                        if len(new_row) > 2:
+                            writer_file = writer(file)
+                            writer_file.writerow(new_row)
+
+                else:
+                    data = []
+                    data.append(new_row)
+                    data[data.index(new_row)].append(signs[name])
+                    if len(data[data.index(new_row)]) > 0:
+                        df = pd.DataFrame(data, columns=columns)
+                        df = df.fillna(0)
+                        df.to_csv(r'{0}'.format(name_file), index=False)
+
+                counter += 1
 
         if k == ord('a'):
             start = not start

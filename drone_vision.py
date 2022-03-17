@@ -41,13 +41,11 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
         # roi == 310 307
         ret, frame = capture.read()
         results = hands.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-        cv2.rectangle(frame, (10, 30), (310, 330), (0, 255, 0), 2)
-        roi = frame[25:335, 8:315]
         k = cv2.waitKey(1)
 
         cv2.imshow('Hands recognizer', frame)
-        hands_roi = hands.process(cv2.cvtColor(roi, cv2.COLOR_BGR2RGB))
-        height_roi, width_roi, channels_roi = roi.shape
+        hands_roi = hands.process(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        height_frame, width_frame, channels_frame = frame.shape
 
         if results.multi_hand_landmarks != None:
             new_row = []
@@ -57,7 +55,7 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                         normalizedLandmark = handLandmarks.landmark[point]
                         pixelCoordinatesLandmark = drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x,
                                                                                               normalizedLandmark.y,
-                                                                                              width_roi, height_roi)
+                                                                                              width_frame, height_frame)
                         new_row.extend(list(pixelCoordinatesLandmark))
                 except TypeError:
                     break
