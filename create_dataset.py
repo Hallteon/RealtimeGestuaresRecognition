@@ -1,4 +1,3 @@
-import time
 from csv import writer
 import cv2
 import mediapipe

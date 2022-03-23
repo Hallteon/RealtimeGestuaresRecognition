@@ -11,17 +11,15 @@ x_train = x_train / 640
 
 y_train_cat = keras.utils.to_categorical(y_train, 6)
 
-model = keras.models.Sequential([Dense(125, input_shape=(42,), activation='tanh'),
-                                Dense(250, activation='tanh'),
-                                BatchNormalization(),
-                                Dense(350, activation='tanh'),
-                                BatchNormalization(),
+model = keras.models.Sequential([Dense(256, input_shape=(42,), activation='relu'),
+                                Dense(524, activation='relu'),
+                                Dense(1048, activation='relu'),
                                 Dense(6, activation='softmax')])
 
 model.compile(optimizer='adam',
              loss='categorical_crossentropy',
              metrics=['accuracy'])
 
-model.fit(x_train, y_train_cat, batch_size=16, epochs=10, validation_split=0.2)
+model.fit(x_train, y_train_cat, batch_size=32, epochs=10, validation_split=0.3)
 
 model.save("gestures_model.h5")
