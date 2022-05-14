@@ -10,7 +10,9 @@ gest_map = {
     2: "right",
     3: "left",
     4: "forward",
-    5: "back"
+    5: "rotate_clockwise",
+    6: "rotate_anti_clockwise",
+    7: "back"
 }
 
 columns = ['x11', 'x21', 'x12', 'x22', 'x13', 'x23', 'x14', 'x24', 'x15', 'x25',

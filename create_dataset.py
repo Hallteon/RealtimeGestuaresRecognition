@@ -5,7 +5,8 @@ import sys
 import os.path
 import pandas as pd
 
-signs = {'up': 0, 'down': 1, 'right': 2, 'left': 3, 'forward': 4, 'back': 5}
+signs = {'up': 0, 'down': 1, 'right': 2, 'left': 3, 'forward': 4, 'rotate_clockwise': 5,
+         'rotate_anti_clockwise': 6, 'back': 7}
 
 drawingModule = mediapipe.solutions.drawing_utils
 handsModule = mediapipe.solutions.hands
@@ -42,6 +43,10 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
         height_frame, width_frame, channels_frame = frame.shape
         k = cv2.waitKey(1)
 
+        if results.multi_hand_landmarks != None:
+            for handLandmarks in results.multi_hand_landmarks:
+                drawingModule.draw_landmarks(frame, handLandmarks, handsModule.HAND_CONNECTIONS)
+
         cv2.imshow('Hands recognizer', frame)
 
         if counter == max_count:
@@ -60,12 +65,13 @@ with handsModule.Hands(static_image_mode=False, min_detection_confidence=0.7, mi
                     for point in handsModule.HandLandmark:
                         normalizedLandmark = handLandmarks.landmark[point]
                         pixelCoordinatesLandmark = drawingModule._normalized_to_pixel_coordinates(normalizedLandmark.x,
-                                                                                              normalizedLandmark.y,
-                                                                                              width_frame, height_frame)
+                                                                                                  normalizedLandmark.y,
+                                                                                                  width_frame,
+                                                                                                  height_frame)
                         new_row.extend(list(pixelCoordinatesLandmark))
 
                 if os.path.exists(name_file):
-                    with open(r'{0}'.format(name_file), 'a') as file:
+                    with open(r'{0}'.format(name_file), 'a', newline='') as file:
                         new_row.append(signs[name])
                         if len(new_row) > 2:
                             writer_file = writer(file)
