@@ -11,18 +11,18 @@ x_train = x_train / 640
 
 y_train_cat = keras.utils.to_categorical(y_train, 8)
 
-model = keras.models.Sequential([Dense(32, input_shape=(42,), activation='relu'),
-                                Dense(54, activation='relu'),
-                                Dense(86, activation='relu'),
-                                Dense(156, activation='relu'),
-                                Dropout(rate=0.8),
+model = keras.models.Sequential([Dense(124, input_shape=(42,), activation='relu'),
+                                Dense(352, activation='relu'),
+                                Dense(466, activation='relu'),
+                                Dense(678, activation='relu'),
+                                Dropout(0.8),
                                 Dense(8, activation='softmax')])
 
 model.compile(optimizer='adam',
              loss='categorical_crossentropy',
              metrics=['accuracy'])
 
-model.fit(x_train, y_train_cat, batch_size=400, epochs=12, validation_split=0.2)
+model.fit(x_train, y_train_cat, batch_size=500, epochs=12, validation_split=0.2)
 
 df_test = pd.read_csv('train_dataset.csv')
 

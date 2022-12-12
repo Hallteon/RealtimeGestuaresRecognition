@@ -5,8 +5,8 @@ import sys
 import os.path
 import pandas as pd
 
-signs = {'up': 0, 'down': 1, 'right': 2, 'left': 3, 'forward': 4, 'rotate_clockwise': 5,
-         'rotate_anti_clockwise': 6, 'back': 7}
+signs = {'up': 0, 'down': 1, 'right': 2, 'left': 3, 'forward': 4, 'back': 5, 'rotate_clockwise': 6,
+         'rotate_anti_clockwise': 7}
 
 drawingModule = mediapipe.solutions.drawing_utils
 handsModule = mediapipe.solutions.hands
